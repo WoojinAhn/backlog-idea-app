@@ -1,22 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn, exec } from "child_process";
-import { promisify } from "util";
+import { spawn, execSync } from "child_process";
 import path from "path";
-
-const execAsync = promisify(exec);
+import { readFileSync, existsSync } from "fs";
 
 const BACKLOG_REPO = process.env.BACKLOG_REPO || "WoojinAhn/backlog";
 const BACKLOG_DIR = process.env.BACKLOG_DIR || path.join(process.env.HOME!, "home/backlog");
 const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "sonnet";
 
-const PROMPT_TEMPLATE = (idea: string) => `
-You are a backlog issue formatter. Given a raw idea, generate a structured GitHub issue.
+// Load prompt template from file, or use default
+function loadPromptTemplate(): string {
+  const customPath = path.join(process.cwd(), "prompt-template.md");
+  if (existsSync(customPath)) {
+    return readFileSync(customPath, "utf-8");
+  }
+  return `You are a backlog issue formatter. Given a raw idea, generate a structured GitHub issue.
 
 Rules:
 - Title: 명사형/동명사형 (e.g. ~시스템, ~앱, ~학습, ~작성). No 구어체.
 - Title can use 괄호 for context: "Spring Boot 레퍼런스 레포 구축 (이커머스 도메인)"
 - Title can use → for transitions: "Vercel → AWS 배포 전환 학습"
-- Labels: pick 1+ from: learning, infra, side-project, content, core-skill
+- Labels: pick 1+ from: {{LABELS}}
 - Body format:
   ## 목적
   (clear goal)
@@ -28,10 +32,47 @@ Rules:
   - [ ] action items as checklist
 
 Respond with ONLY valid JSON, no markdown fences:
-{"title": "...", "labels": ["..."], "body": "..."}
+{"title": "...", "labels": ["..."], "body": "..."}`;
+}
 
-Idea: ${idea}
-`;
+function getValidLabels(): string[] {
+  const envLabels = process.env.ISSUE_LABELS;
+  if (envLabels) {
+    return envLabels.split(",").map((l) => l.trim());
+  }
+  return ["learning", "infra", "side-project", "content", "core-skill"];
+}
+
+function getDefaultLabel(): string {
+  return process.env.DEFAULT_LABEL || getValidLabels()[0];
+}
+
+function buildPrompt(idea: string): string {
+  const template = loadPromptTemplate();
+  const labels = getValidLabels().join(", ");
+  return template.replace("{{LABELS}}", labels) + `\n\nIdea: ${idea}`;
+}
+
+// Check CLI tool availability
+function checkCli(bin: string, name: string): void {
+  try {
+    execSync(`which ${bin}`, { stdio: "ignore" });
+  } catch {
+    throw new Error(
+      `${name} CLI not found. Install: https://docs.anthropic.com/en/docs/claude-code`
+    );
+  }
+}
+
+function checkGhAuth(): void {
+  try {
+    execSync("gh auth status", { stdio: "ignore" });
+  } catch {
+    throw new Error(
+      "GitHub CLI not authenticated. Run: gh auth login"
+    );
+  }
+}
 
 function runClaude(prompt: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -39,7 +80,7 @@ function runClaude(prompt: string): Promise<string> {
     delete env.CLAUDECODE;
     delete env.CLAUDE_CODE_ENTRYPOINT;
 
-    const child = spawn(CLAUDE_BIN, ["-p", "--model", "sonnet"], {
+    const child = spawn(CLAUDE_BIN, ["-p", "--model", CLAUDE_MODEL], {
       cwd: BACKLOG_DIR,
       env,
       stdio: ["pipe", "pipe", "pipe"],
@@ -56,13 +97,14 @@ function runClaude(prompt: string): Promise<string> {
 
     const timer = setTimeout(() => {
       child.kill();
-      reject(new Error("Claude CLI timed out after 90s"));
+      reject(new Error("Claude CLI timed out"));
     }, 90000);
 
     child.on("close", (code) => {
       clearTimeout(timer);
       if (code !== 0) {
-        reject(new Error(`Claude CLI exited with code ${code}: ${stderr}`));
+        console.error(`Claude CLI error (code ${code}): ${stderr}`);
+        reject(new Error("이슈 포맷팅에 실패했습니다"));
       } else {
         resolve(stdout);
       }
@@ -70,13 +112,82 @@ function runClaude(prompt: string): Promise<string> {
 
     child.on("error", (err) => {
       clearTimeout(timer);
-      reject(err);
+      console.error("Claude CLI spawn error:", err);
+      reject(new Error("Claude CLI를 실행할 수 없습니다"));
     });
   });
 }
 
+function createGhIssue(
+  title: string,
+  body: string,
+  labels: string[]
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const args = [
+      "issue", "create",
+      "--repo", BACKLOG_REPO,
+      "--title", title,
+      "--body", body,
+    ];
+    for (const label of labels) {
+      args.push("--label", label);
+    }
+
+    const child = spawn("gh", args, {
+      cwd: BACKLOG_DIR,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (data) => { stdout += data.toString(); });
+    child.stderr.on("data", (data) => { stderr += data.toString(); });
+
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error("GitHub CLI timed out"));
+    }, 30000);
+
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code !== 0) {
+        console.error(`gh CLI error (code ${code}): ${stderr}`);
+        reject(new Error("이슈 생성에 실패했습니다"));
+      } else {
+        resolve(stdout.trim());
+      }
+    });
+
+    child.on("error", (err) => {
+      clearTimeout(timer);
+      console.error("gh CLI spawn error:", err);
+      reject(new Error("GitHub CLI를 실행할 수 없습니다"));
+    });
+  });
+}
+
+async function ensureLabelsExist(labels: string[]): Promise<void> {
+  for (const label of labels) {
+    try {
+      execSync(
+        `gh label create "${label}" --repo ${BACKLOG_REPO} --force`,
+        { stdio: "ignore" }
+      );
+    } catch {
+      // label creation failed, issue create will handle it
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // Validate CLI tools on first request
+    checkCli(CLAUDE_BIN, "Claude Code");
+    checkCli("gh", "GitHub");
+    checkGhAuth();
+
     const { idea, dryRun } = await req.json();
 
     if (!idea || typeof idea !== "string" || idea.trim().length === 0) {
@@ -84,7 +195,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call Claude CLI to format the idea into an issue
-    const prompt = PROMPT_TEMPLATE(idea.trim());
+    const prompt = buildPrompt(idea.trim());
     const claudeOutput = await runClaude(prompt);
 
     // Parse Claude's JSON response
@@ -96,45 +207,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const issue = JSON.parse(jsonMatch[0]) as {
-      title: string;
-      labels: string[];
-      body: string;
-    };
+    const parsed = JSON.parse(jsonMatch[0]);
+    const validLabels = getValidLabels();
 
-    // Validate labels
-    const validLabels = ["learning", "infra", "side-project", "content", "core-skill"];
-    issue.labels = issue.labels.filter((l) => validLabels.includes(l));
-    if (issue.labels.length === 0) {
-      issue.labels = ["learning"];
+    const title = typeof parsed.title === "string" ? parsed.title : "";
+    const body = typeof parsed.body === "string" ? parsed.body : "";
+    let labels: string[] = Array.isArray(parsed.labels)
+      ? parsed.labels.filter((l: unknown) => typeof l === "string" && validLabels.includes(l as string))
+      : [];
+
+    if (labels.length === 0) {
+      labels = [getDefaultLabel()];
+    }
+
+    if (!title) {
+      return NextResponse.json(
+        { error: "Claude returned empty title" },
+        { status: 500 }
+      );
     }
 
     // Dry run: return formatted issue without creating it
     if (dryRun) {
       return NextResponse.json({
         dryRun: true,
-        title: issue.title,
-        labels: issue.labels,
-        body: issue.body,
+        title,
+        labels,
+        body,
       });
     }
 
-    // Create the GitHub issue
-    const labelArgs = issue.labels.map((l) => `--label "${l}"`).join(" ");
-    const ghCmd = `gh issue create --repo ${BACKLOG_REPO} --title "${issue.title.replace(/"/g, '\\"')}" --body "${issue.body.replace(/"/g, '\\"')}" ${labelArgs}`;
+    // Ensure labels exist on the target repo
+    await ensureLabelsExist(labels);
 
-    const { stdout: ghOutput } = await execAsync(ghCmd, {
-      cwd: BACKLOG_DIR,
-      timeout: 30000,
-    });
+    // Create the GitHub issue (spawn, no shell)
+    const url = await createGhIssue(title, body, labels);
 
-    const url = ghOutput.trim();
-
-    return NextResponse.json({
-      url,
-      title: issue.title,
-      labels: issue.labels,
-    });
+    return NextResponse.json({ url, title, labels });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
