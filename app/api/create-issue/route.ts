@@ -3,6 +3,25 @@ import { spawn, execSync } from "child_process";
 import path from "path";
 import { readFileSync, existsSync } from "fs";
 
+const LOCALE = process.env.LOCALE === "ko" ? "ko" : "en";
+
+const messages = {
+  en: {
+    formatFailed: "Failed to format issue",
+    claudeNotRunnable: "Cannot run Claude CLI",
+    issueFailed: "Failed to create issue",
+    ghNotRunnable: "Cannot run GitHub CLI",
+  },
+  ko: {
+    formatFailed: "이슈 포맷팅에 실패했습니다",
+    claudeNotRunnable: "Claude CLI를 실행할 수 없습니다",
+    issueFailed: "이슈 생성에 실패했습니다",
+    ghNotRunnable: "GitHub CLI를 실행할 수 없습니다",
+  },
+} as const;
+
+const msg = messages[LOCALE];
+
 const BACKLOG_REPO = process.env.BACKLOG_REPO || "WoojinAhn/backlog";
 const BACKLOG_DIR = process.env.BACKLOG_DIR || path.join(process.env.HOME!, "home/backlog");
 const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
@@ -104,7 +123,7 @@ function runClaude(prompt: string): Promise<string> {
       clearTimeout(timer);
       if (code !== 0) {
         console.error(`Claude CLI error (code ${code}): ${stderr}`);
-        reject(new Error("이슈 포맷팅에 실패했습니다"));
+        reject(new Error(msg.formatFailed));
       } else {
         resolve(stdout);
       }
@@ -113,7 +132,7 @@ function runClaude(prompt: string): Promise<string> {
     child.on("error", (err) => {
       clearTimeout(timer);
       console.error("Claude CLI spawn error:", err);
-      reject(new Error("Claude CLI를 실행할 수 없습니다"));
+      reject(new Error(msg.claudeNotRunnable));
     });
   });
 }
@@ -154,7 +173,7 @@ function createGhIssue(
       clearTimeout(timer);
       if (code !== 0) {
         console.error(`gh CLI error (code ${code}): ${stderr}`);
-        reject(new Error("이슈 생성에 실패했습니다"));
+        reject(new Error(msg.issueFailed));
       } else {
         resolve(stdout.trim());
       }
@@ -163,7 +182,7 @@ function createGhIssue(
     child.on("error", (err) => {
       clearTimeout(timer);
       console.error("gh CLI spawn error:", err);
-      reject(new Error("GitHub CLI를 실행할 수 없습니다"));
+      reject(new Error(msg.ghNotRunnable));
     });
   });
 }
