@@ -43,7 +43,7 @@ No Anthropic API key needed — uses your existing Claude Code subscription.
 | `DEFAULT_LABEL` | *(first of ISSUE_LABELS)* | Fallback label when none match |
 | `API_TOKEN` | *(none)* | Bearer token for API auth (optional) |
 | `RATE_LIMIT` | `10` | Max requests per minute |
-| `LOCALE` | `en` | Error message language (`en` or `ko`) |
+| `LOCALE` | *(auto from `LANG`)* | Language for errors and issue output (`en` or `ko`). Falls back to OS `LANG` env var. |
 
 See `.env.example` for a template.
 

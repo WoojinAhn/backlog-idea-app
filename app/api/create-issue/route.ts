@@ -3,7 +3,14 @@ import { spawn, execSync } from "child_process";
 import path from "path";
 import { readFileSync, existsSync } from "fs";
 
-const LOCALE = process.env.LOCALE === "ko" ? "ko" : "en";
+function detectLocale(): "ko" | "en" {
+  const explicit = process.env.LOCALE;
+  if (explicit) return explicit === "ko" ? "ko" : "en";
+  const lang = process.env.LANG || "";
+  return lang.startsWith("ko") ? "ko" : "en";
+}
+
+const LOCALE = detectLocale();
 
 const messages = {
   en: {
@@ -36,18 +43,18 @@ function loadPromptTemplate(): string {
   return `You are a backlog issue formatter. Given a raw idea, generate a structured GitHub issue.
 
 Rules:
-- Title: 명사형/동명사형 (e.g. ~시스템, ~앱, ~학습, ~작성). No 구어체.
-- Title can use 괄호 for context: "Spring Boot 레퍼런스 레포 구축 (이커머스 도메인)"
-- Title can use → for transitions: "Vercel → AWS 배포 전환 학습"
+- Title: Use noun or gerund form (e.g. "Auth System", "API Migration", "Redis Caching Setup")
+- Title can use parentheses for context: "Reference Repo Setup (E-commerce Domain)"
+- Title can use → for transitions: "Vercel → AWS Deployment Migration"
 - Labels: pick 1+ from: {{LABELS}}
 - Body format:
-  ## 목적
+  ## Goal
   (clear goal)
 
-  ## 배경
+  ## Background
   (optional context, omit section if not needed)
 
-  ## 할 일
+  ## Tasks
   - [ ] action items as checklist
 
 Respond with ONLY valid JSON, no markdown fences:
@@ -69,7 +76,15 @@ function getDefaultLabel(): string {
 function buildPrompt(idea: string): string {
   const template = loadPromptTemplate();
   const labels = getValidLabels().join(", ");
-  return template.replace("{{LABELS}}", labels) + `\n\nIdea: ${idea}`;
+  let prompt = template.replace("{{LABELS}}", labels);
+
+  if (LOCALE === "ko") {
+    prompt += "\n\nIMPORTANT: Write the issue title and body entirely in Korean.";
+  } else {
+    prompt += "\n\nIMPORTANT: Write the issue title and body entirely in English.";
+  }
+
+  return prompt + `\n\nIdea: ${idea}`;
 }
 
 // Check CLI tool availability

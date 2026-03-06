@@ -43,7 +43,7 @@ Anthropic API 키 불필요 — 기존 Claude Code 구독을 그대로 사용합
 | `DEFAULT_LABEL` | *(ISSUE_LABELS의 첫 번째)* | 매칭 라벨 없을 때 기본값 |
 | `API_TOKEN` | *(없음)* | API 인증용 Bearer 토큰 (선택) |
 | `RATE_LIMIT` | `10` | 분당 최대 요청 수 |
-| `LOCALE` | `en` | 에러 메시지 언어 (`en` 또는 `ko`) |
+| `LOCALE` | *(`LANG`에서 자동 감지)* | 에러 및 이슈 출력 언어 (`en` 또는 `ko`). OS `LANG` 환경변수를 fallback으로 사용. |
 
 `.env.example` 파일을 참고하세요.
 
