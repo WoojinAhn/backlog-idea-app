@@ -80,6 +80,56 @@ npm run dev
 
 Open http://localhost:3000.
 
+## External API Access
+
+You can call the API directly from any HTTP client — not just the browser UI.
+
+### curl
+
+**Basic usage:**
+
+```bash
+curl -X POST http://localhost:3000/api/create-issue \
+  -H "Content-Type: application/json" \
+  -d '{"idea": "your idea"}'
+```
+
+**With API token authentication:**
+
+```bash
+curl -X POST http://localhost:3000/api/create-issue \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-token" \
+  -d '{"idea": "your idea"}'
+```
+
+**Dry-run (preview without creating an issue):**
+
+```bash
+curl -X POST http://localhost:3000/api/create-issue \
+  -H "Content-Type: application/json" \
+  -d '{"idea": "your idea", "dryRun": true}'
+```
+
+### iOS Shortcuts
+
+You can create an iOS Shortcut to submit ideas from your phone:
+
+1. Open the **Shortcuts** app and create a new shortcut
+2. Add an **Ask for Input** action (or use **Dictate Text** for voice input)
+3. Add a **Get Contents of URL** action:
+   - **URL**: `http://<your-mac-ip>:3000/api/create-issue`
+   - **Method**: POST
+   - **Headers**: `Content-Type: application/json` (and `Authorization: Bearer your-token` if `API_TOKEN` is set)
+   - **Request Body** (JSON): `{"idea": "<input from step 2>"}`
+4. Optionally add a **Show Result** action to display the created issue URL
+
+### Network Access Notes
+
+- Other devices must be on the **same local network (LAN)** as the machine running the app.
+- For remote access, use a tunneling solution such as [Tailscale](https://tailscale.com/).
+- **Recommended**: Set `API_TOKEN` when exposing the app on the network to prevent unauthorized access.
+
 ## Project Structure
 
 ```

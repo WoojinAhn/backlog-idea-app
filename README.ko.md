@@ -80,6 +80,56 @@ npm run dev
 
 http://localhost:3000 에서 확인.
 
+## 외부 API 접근
+
+브라우저 UI 외에도 HTTP 클라이언트에서 직접 API를 호출할 수 있습니다.
+
+### curl
+
+**기본 사용법:**
+
+```bash
+curl -X POST http://localhost:3000/api/create-issue \
+  -H "Content-Type: application/json" \
+  -d '{"idea": "your idea"}'
+```
+
+**API 토큰 인증 포함:**
+
+```bash
+curl -X POST http://localhost:3000/api/create-issue \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-token" \
+  -d '{"idea": "your idea"}'
+```
+
+**Dry-run (이슈 생성 없이 미리보기):**
+
+```bash
+curl -X POST http://localhost:3000/api/create-issue \
+  -H "Content-Type: application/json" \
+  -d '{"idea": "your idea", "dryRun": true}'
+```
+
+### iOS 단축어
+
+iPhone에서 아이디어를 제출하는 단축어를 만들 수 있습니다:
+
+1. **단축어** 앱에서 새 단축어 생성
+2. **입력 요청** 액션 추가 (또는 음성 입력을 위해 **텍스트 받아쓰기** 사용)
+3. **URL 콘텐츠 가져오기** 액션 추가:
+   - **URL**: `http://<your-mac-ip>:3000/api/create-issue`
+   - **Method**: POST
+   - **Headers**: `Content-Type: application/json` (`API_TOKEN` 설정 시 `Authorization: Bearer your-token` 추가)
+   - **Request Body** (JSON): `{"idea": "<2단계 입력값>"}`
+4. 선택적으로 **결과 표시** 액션을 추가하여 생성된 이슈 URL 확인
+
+### 네트워크 접근 참고사항
+
+- 다른 기기는 앱이 실행 중인 머신과 **같은 로컬 네트워크(LAN)**에 있어야 합니다.
+- 원격 접근이 필요하면 [Tailscale](https://tailscale.com/) 같은 터널링 솔루션을 사용하세요.
+- **권장**: 네트워크에 앱을 노출할 때는 무단 접근 방지를 위해 `API_TOKEN`을 설정하세요.
+
 ## 프로젝트 구조
 
 ```
