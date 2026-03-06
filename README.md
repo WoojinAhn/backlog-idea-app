@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Backlog Idea
+
+A local web app that turns raw ideas into structured GitHub issues on the [backlog](https://github.com/WoojinAhn/backlog) repo — powered by Claude Code CLI.
+
+## How It Works
+
+```
+Browser (idea input) → Next.js API Route → claude -p (stdin) → gh issue create
+```
+
+1. Enter an idea in the textarea
+2. Claude Code CLI (`claude -p --model sonnet`) formats it into a proper issue (title, labels, body) following the backlog repo's conventions
+3. `gh` CLI creates the issue on GitHub
+4. The created issue URL is returned
+
+No Anthropic API key needed — uses your existing Claude Code subscription.
+
+### Technical Notes
+
+- The prompt is passed to `claude` via **stdin** (not as a CLI argument) to avoid intermittent hangs.
+- Uses `spawn` (not `exec`) for reliable subprocess control.
+- `CLAUDECODE` / `CLAUDE_CODE_ENTRYPOINT` env vars are stripped to prevent nested session detection.
+
+## Prerequisites
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) (`claude`)
+- [GitHub CLI](https://cli.github.com/) (`gh`) — authenticated
+- Node.js 18+
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+├── layout.tsx
+├── page.tsx                    # Idea input UI
+└── api/
+    └── create-issue/
+        └── route.ts            # claude CLI → gh issue create
+```
