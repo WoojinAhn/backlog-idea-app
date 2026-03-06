@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { spawn, exec } from "child_process";
 import { promisify } from "util";
+import path from "path";
 
 const execAsync = promisify(exec);
 
-const BACKLOG_REPO = "WoojinAhn/backlog";
-const BACKLOG_DIR = "~/home/backlog";
+const BACKLOG_REPO = process.env.BACKLOG_REPO || "WoojinAhn/backlog";
+const BACKLOG_DIR = process.env.BACKLOG_DIR || path.join(process.env.HOME!, "home/backlog");
+const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
 
 const PROMPT_TEMPLATE = (idea: string) => `
 You are a backlog issue formatter. Given a raw idea, generate a structured GitHub issue.
@@ -37,7 +39,7 @@ function runClaude(prompt: string): Promise<string> {
     delete env.CLAUDECODE;
     delete env.CLAUDE_CODE_ENTRYPOINT;
 
-    const child = spawn("claude", ["-p", "--model", "sonnet"], {
+    const child = spawn(CLAUDE_BIN, ["-p", "--model", "sonnet"], {
       cwd: BACKLOG_DIR,
       env,
       stdio: ["pipe", "pipe", "pipe"],
