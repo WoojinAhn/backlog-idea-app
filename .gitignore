@@ -44,5 +44,6 @@ next-env.d.ts
 # playwright mcp
 .playwright-mcp/
 
-# claude notes
+# claude notes & local commands
 .claude/notes.md
+.claude/commands/
