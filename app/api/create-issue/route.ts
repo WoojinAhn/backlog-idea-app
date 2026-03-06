@@ -79,7 +79,9 @@ function buildPrompt(idea: string): string {
   let prompt = template.replace("{{LABELS}}", labels);
 
   if (LOCALE === "ko") {
-    prompt += "\n\nIMPORTANT: Write the issue title and body entirely in Korean.";
+    prompt += `\n\nIMPORTANT: Write the issue in BOTH English and Korean.
+- Title: English only
+- Body: Write the full content in English first, then add "---" separator, then write the exact same content translated in Korean. Both sections must have identical structure and meaning.`;
   } else {
     prompt += "\n\nIMPORTANT: Write the issue title and body entirely in English.";
   }
