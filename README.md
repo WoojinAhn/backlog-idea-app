@@ -38,15 +38,35 @@ No Anthropic API key needed — uses your existing Claude Code subscription.
 | `BACKLOG_REPO` | `WoojinAhn/backlog` | Target GitHub repo (`owner/repo`) |
 | `BACKLOG_DIR` | `~/home/backlog` | Local clone path (used as `cwd`) |
 | `CLAUDE_BIN` | `claude` | Path to Claude Code CLI binary |
+| `CLAUDE_MODEL` | `sonnet` | Claude model to use |
+| `ISSUE_LABELS` | `learning,infra,side-project,content,core-skill` | Comma-separated valid labels |
+| `DEFAULT_LABEL` | *(first of ISSUE_LABELS)* | Fallback label when none match |
+| `API_TOKEN` | *(none)* | Bearer token for API auth (optional) |
+| `RATE_LIMIT` | `10` | Max requests per minute |
+
+See `.env.example` for a template.
+
+## Customization
+
+### Prompt Template
+
+Edit `prompt-template.md` in the project root to customize how ideas are formatted into issues. Use `{{LABELS}}` as a placeholder — it will be replaced with your `ISSUE_LABELS` at runtime.
+
+### Labels
+
+Set `ISSUE_LABELS` to match your repo's labels:
+
+```bash
+export ISSUE_LABELS="bug,feature,docs,chore"
+```
+
+Missing labels are auto-created on the target repo.
 
 ## Getting Started
 
 ```bash
 npm install
-
-# (optional) override defaults
-export BACKLOG_REPO="yourname/your-repo"
-
+cp .env.example .env.local   # edit with your settings
 npm run dev
 ```
 
@@ -61,4 +81,6 @@ app/
 └── api/
     └── create-issue/
         └── route.ts            # claude CLI → gh issue create
+prompt-template.md              # Customizable prompt template
+.env.example                    # Environment variable template
 ```

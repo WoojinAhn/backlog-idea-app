@@ -38,15 +38,35 @@ Anthropic API 키 불필요 — 기존 Claude Code 구독을 그대로 사용합
 | `BACKLOG_REPO` | `WoojinAhn/backlog` | 대상 GitHub 레포 (`owner/repo`) |
 | `BACKLOG_DIR` | `~/home/backlog` | 로컬 클론 경로 (`cwd`로 사용) |
 | `CLAUDE_BIN` | `claude` | Claude Code CLI 바이너리 경로 |
+| `CLAUDE_MODEL` | `sonnet` | 사용할 Claude 모델 |
+| `ISSUE_LABELS` | `learning,infra,side-project,content,core-skill` | 쉼표 구분 유효 라벨 목록 |
+| `DEFAULT_LABEL` | *(ISSUE_LABELS의 첫 번째)* | 매칭 라벨 없을 때 기본값 |
+| `API_TOKEN` | *(없음)* | API 인증용 Bearer 토큰 (선택) |
+| `RATE_LIMIT` | `10` | 분당 최대 요청 수 |
+
+`.env.example` 파일을 참고하세요.
+
+## 커스터마이징
+
+### 프롬프트 템플릿
+
+프로젝트 루트의 `prompt-template.md`를 수정하면 아이디어 → 이슈 변환 방식을 커스터마이징할 수 있습니다. `{{LABELS}}`는 `ISSUE_LABELS` 값으로 런타임에 치환됩니다.
+
+### 라벨
+
+`ISSUE_LABELS`를 자신의 레포 라벨에 맞게 설정하세요:
+
+```bash
+export ISSUE_LABELS="bug,feature,docs,chore"
+```
+
+대상 레포에 없는 라벨은 자동 생성됩니다.
 
 ## 시작하기
 
 ```bash
 npm install
-
-# (선택) 기본값 변경
-export BACKLOG_REPO="yourname/your-repo"
-
+cp .env.example .env.local   # 설정 편집
 npm run dev
 ```
 
@@ -61,4 +81,6 @@ app/
 └── api/
     └── create-issue/
         └── route.ts            # claude CLI → gh issue create
+prompt-template.md              # 커스터마이징 가능한 프롬프트 템플릿
+.env.example                    # 환경변수 템플릿
 ```
