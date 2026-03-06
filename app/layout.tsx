@@ -17,13 +17,21 @@ export const metadata: Metadata = {
   description: "Quickly create backlog issues from ideas",
 };
 
+function detectLocale(): "ko" | "en" {
+  const explicit = process.env.LOCALE;
+  if (explicit) return explicit === "ko" ? "ko" : "en";
+  const lang = process.env.LANG || "";
+  return lang.startsWith("ko") ? "ko" : "en";
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = detectLocale();
   return (
-    <html lang="ko">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

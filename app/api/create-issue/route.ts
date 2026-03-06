@@ -256,7 +256,30 @@ export async function POST(req: NextRequest) {
     checkCli("gh", "GitHub");
     checkGhAuth();
 
-    const { idea, dryRun } = await req.json();
+    const reqBody = await req.json();
+
+    // Direct mode: skip Claude formatting, create issue from provided data
+    if (reqBody.direct) {
+      const { title, labels: reqLabels, body } = reqBody;
+
+      if (!title || typeof title !== "string" || title.trim().length === 0) {
+        return NextResponse.json({ error: "Title is required" }, { status: 400 });
+      }
+
+      const validLabels = getValidLabels();
+      let labels: string[] = Array.isArray(reqLabels)
+        ? reqLabels.filter((l: unknown) => typeof l === "string" && validLabels.includes(l as string))
+        : [];
+      if (labels.length === 0) {
+        labels = [getDefaultLabel()];
+      }
+
+      await ensureLabelsExist(labels);
+      const url = await createGhIssue(title.trim(), typeof body === "string" ? body : "", labels);
+      return NextResponse.json({ url, title: title.trim(), labels });
+    }
+
+    const { idea, dryRun } = reqBody;
 
     if (!idea || typeof idea !== "string" || idea.trim().length === 0) {
       return NextResponse.json({ error: "Idea is required" }, { status: 400 });
