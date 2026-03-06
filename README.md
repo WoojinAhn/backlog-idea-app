@@ -84,6 +84,7 @@ Edit `.env.local` — at minimum, set these two:
 ```bash
 BACKLOG_REPO=your-username/your-repo   # target GitHub repo
 BACKLOG_DIR=~/path/to/your-repo        # local clone of that repo
+LOCALE=ko                              # optional: bilingual issues (EN + KO)
 ```
 
 Then start the web UI or use the CLI directly:

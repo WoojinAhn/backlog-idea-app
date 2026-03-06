@@ -84,6 +84,7 @@ cp .env.example .env.local
 ```bash
 BACKLOG_REPO=your-username/your-repo   # 대상 GitHub 레포
 BACKLOG_DIR=~/path/to/your-repo        # 해당 레포의 로컬 클론 경로
+LOCALE=ko                              # 선택: 이중언어 이슈 생성 (EN + KO)
 ```
 
 웹 UI를 시작하거나 CLI를 직접 사용:
