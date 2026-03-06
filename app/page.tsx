@@ -95,7 +95,7 @@ export default function Home() {
               ))}
             </div>
             <a
-              href={result.url}
+              href={result.url.startsWith("https://") ? result.url : "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-2 inline-block text-sm font-medium text-green-800 underline dark:text-green-300"
