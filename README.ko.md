@@ -167,14 +167,19 @@ CLI를 [커스텀 슬래시 커맨드](https://docs.anthropic.com/en/docs/claude
 ```markdown
 ---
 description: Create a GitHub issue from a raw idea
-argument-hint: [--dry-run] your idea here
+argument-hint: [--dry-run] [--ko] your idea here
 allowed-tools: Bash
 ---
 
 Run the backlog-idea CLI with the user's input.
+Flags: --dry-run (preview only), --ko (bilingual EN+KO).
+If --ko is present, prefix with LOCALE=ko.
+
+CRITICAL: Run EXACTLY ONCE. Do NOT retry even if output appears empty.
+Redirect to a temp file to capture stdout reliably.
 
 \```bash
-cd /path/to/backlog-idea-app && npm run cli -- $ARGUMENTS
+cd /path/to/backlog-idea-app && npm run cli -- $ARGUMENTS > /tmp/backlog-idea.log 2>&1; cat /tmp/backlog-idea.log
 \```
 
 Summarize the result to the user.
@@ -185,6 +190,7 @@ Claude Code 세션에서 사용:
 ```
 /backlog-idea Redis caching for API responses
 /backlog-idea --dry-run new onboarding flow
+/backlog-idea --ko 맥주 특가 탐색기
 ```
 
 ## 프로젝트 구조
