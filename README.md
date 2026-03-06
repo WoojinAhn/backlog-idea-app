@@ -1,3 +1,5 @@
+[🇰🇷 한국어](./README.ko.md)
+
 # Backlog Idea
 
 A local web app that turns raw ideas into structured GitHub issues on the [backlog](https://github.com/WoojinAhn/backlog) repo — powered by Claude Code CLI.
