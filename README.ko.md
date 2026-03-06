@@ -31,10 +31,22 @@ Anthropic API 키 불필요 — 기존 Claude Code 구독을 그대로 사용합
 - [GitHub CLI](https://cli.github.com/) (`gh`) — 인증 완료 상태
 - Node.js 18+
 
+## 설정
+
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `BACKLOG_REPO` | `WoojinAhn/backlog` | 대상 GitHub 레포 (`owner/repo`) |
+| `BACKLOG_DIR` | `~/home/backlog` | 로컬 클론 경로 (`cwd`로 사용) |
+| `CLAUDE_BIN` | `claude` | Claude Code CLI 바이너리 경로 |
+
 ## 시작하기
 
 ```bash
 npm install
+
+# (선택) 기본값 변경
+export BACKLOG_REPO="yourname/your-repo"
+
 npm run dev
 ```
 

@@ -31,10 +31,22 @@ No Anthropic API key needed — uses your existing Claude Code subscription.
 - [GitHub CLI](https://cli.github.com/) (`gh`) — authenticated
 - Node.js 18+
 
+## Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BACKLOG_REPO` | `WoojinAhn/backlog` | Target GitHub repo (`owner/repo`) |
+| `BACKLOG_DIR` | `~/home/backlog` | Local clone path (used as `cwd`) |
+| `CLAUDE_BIN` | `claude` | Path to Claude Code CLI binary |
+
 ## Getting Started
 
 ```bash
 npm install
+
+# (optional) override defaults
+export BACKLOG_REPO="yourname/your-repo"
+
 npm run dev
 ```
 
