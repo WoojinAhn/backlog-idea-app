@@ -63,6 +63,13 @@ export ISSUE_LABELS="bug,feature,docs,chore"
 
 Missing labels are auto-created on the target repo.
 
+### Locale
+
+Auto-detected from OS `LANG`, or override with `LOCALE` env var.
+
+- **`en`** (default): Issue title and body in English.
+- **`ko`**: Issue title in English. Body contains full English content, followed by `---`, followed by identical Korean translation.
+
 ## Getting Started
 
 ```bash
