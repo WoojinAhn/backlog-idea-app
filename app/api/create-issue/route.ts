@@ -181,8 +181,40 @@ async function ensureLabelsExist(labels: string[]): Promise<void> {
   }
 }
 
+const API_TOKEN = process.env.API_TOKEN;
+
+const requestTimestamps: number[] = [];
+const RATE_LIMIT = Number(process.env.RATE_LIMIT) || 10;
+const RATE_WINDOW_MS = 60_000;
+
+function checkRateLimit(): boolean {
+  const now = Date.now();
+  while (requestTimestamps.length > 0 && requestTimestamps[0] < now - RATE_WINDOW_MS) {
+    requestTimestamps.shift();
+  }
+  if (requestTimestamps.length >= RATE_LIMIT) return false;
+  requestTimestamps.push(now);
+  return true;
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // Auth check (optional, enabled when API_TOKEN is set)
+    if (API_TOKEN) {
+      const auth = req.headers.get("authorization");
+      if (auth !== `Bearer ${API_TOKEN}`) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
+
+    // Rate limiting
+    if (!checkRateLimit()) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later." },
+        { status: 429 }
+      );
+    }
+
     // Validate CLI tools on first request
     checkCli(CLAUDE_BIN, "Claude Code");
     checkCli("gh", "GitHub");
