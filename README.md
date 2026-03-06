@@ -2,7 +2,7 @@
 
 # Backlog Idea
 
-A local web app that turns raw ideas into structured GitHub issues on the [backlog](https://github.com/WoojinAhn/backlog) repo — powered by Claude Code CLI.
+A local web app that turns raw ideas into structured GitHub issues on any target repo — powered by Claude Code CLI.
 
 ## How It Works
 
@@ -11,7 +11,7 @@ Browser (idea input) → Next.js API Route → claude -p (stdin) → gh issue cr
 ```
 
 1. Enter an idea in the textarea
-2. Claude Code CLI (`claude -p --model sonnet`) formats it into a proper issue (title, labels, body) following the backlog repo's conventions
+2. Claude Code CLI (`claude -p --model sonnet`) formats it into a proper issue (title, labels, body) following your repo's conventions
 3. `gh` CLI creates the issue on GitHub
 4. The created issue URL is returned
 
@@ -150,10 +150,15 @@ You can create an iOS Shortcut to submit ideas from your phone:
 ```
 app/
 ├── layout.tsx
-├── page.tsx                    # Idea input UI
+├── page.tsx                    # Idea input UI (two-step: format → edit → create)
 └── api/
+    ├── config/
+    │   └── route.ts            # GET locale & valid labels
     └── create-issue/
-        └── route.ts            # claude CLI → gh issue create
+        └── route.ts            # POST claude format / direct create
+lib/
+└── core.ts                     # Shared logic (Claude/gh runners, config, prompt)
+cli.ts                          # Standalone CLI entry point
 prompt-template.md              # Customizable prompt template
 .env.example                    # Environment variable template
 ```

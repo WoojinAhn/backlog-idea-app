@@ -2,7 +2,7 @@
 
 # Backlog Idea
 
-자유로운 아이디어를 [backlog](https://github.com/WoojinAhn/backlog) 레포의 구조화된 GitHub 이슈로 변환하는 로컬 웹앱입니다. Claude Code CLI로 구동됩니다.
+자유로운 아이디어를 대상 레포의 구조화된 GitHub 이슈로 변환하는 로컬 웹앱입니다. Claude Code CLI로 구동됩니다.
 
 ## 동작 방식
 
@@ -11,7 +11,7 @@
 ```
 
 1. 텍스트 영역에 아이디어를 입력
-2. Claude Code CLI (`claude -p --model sonnet`)가 backlog 레포 컨벤션에 맞는 이슈(제목, 라벨, 본문)로 포맷팅
+2. Claude Code CLI (`claude -p --model sonnet`)가 대상 레포 컨벤션에 맞는 이슈(제목, 라벨, 본문)로 포맷팅
 3. `gh` CLI로 GitHub 이슈 생성
 4. 생성된 이슈 URL 반환
 
@@ -150,10 +150,15 @@ iPhone에서 아이디어를 제출하는 단축어를 만들 수 있습니다:
 ```
 app/
 ├── layout.tsx
-├── page.tsx                    # 아이디어 입력 UI
+├── page.tsx                    # 아이디어 입력 UI (2단계: 포맷 → 편집 → 생성)
 └── api/
+    ├── config/
+    │   └── route.ts            # GET 로케일 & 유효 라벨
     └── create-issue/
-        └── route.ts            # claude CLI → gh issue create
+        └── route.ts            # POST Claude 포맷 / 직접 생성
+lib/
+└── core.ts                     # 공유 로직 (Claude/gh 실행, 설정, 프롬프트)
+cli.ts                          # 독립 CLI 진입점
 prompt-template.md              # 커스터마이징 가능한 프롬프트 템플릿
 .env.example                    # 환경변수 템플릿
 ```
