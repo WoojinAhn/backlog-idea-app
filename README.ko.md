@@ -80,6 +80,21 @@ npm run dev
 
 http://localhost:3000 에서 확인.
 
+## CLI
+
+웹 서버 없이 단독으로 동작합니다. 동일한 환경변수(`.env.local`)와 프롬프트 템플릿을 사용합니다.
+
+```bash
+# Basic usage
+npm run cli -- "your idea here"
+
+# Dry-run (format only, no issue creation)
+npm run cli -- --dry-run "your idea here"
+
+# Pipe from stdin
+echo "your idea" | npm run cli
+```
+
 ## 외부 API 접근
 
 브라우저 UI 외에도 HTTP 클라이언트에서 직접 API를 호출할 수 있습니다.

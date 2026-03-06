@@ -80,6 +80,21 @@ npm run dev
 
 Open http://localhost:3000.
 
+## CLI
+
+The CLI works standalone without the web server. It uses the same env vars (`.env.local`) and prompt template.
+
+```bash
+# Basic usage
+npm run cli -- "your idea here"
+
+# Dry-run (format only, no issue creation)
+npm run cli -- --dry-run "your idea here"
+
+# Pipe from stdin
+echo "your idea" | npm run cli
+```
+
 ## External API Access
 
 You can call the API directly from any HTTP client — not just the browser UI.
