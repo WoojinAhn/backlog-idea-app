@@ -35,8 +35,8 @@ Anthropic API 키 불필요 — 기존 Claude Code 구독을 그대로 사용합
 
 | 변수 | 기본값 | 설명 |
 |------|--------|------|
-| `BACKLOG_REPO` | `WoojinAhn/backlog` | 대상 GitHub 레포 (`owner/repo`) |
-| `BACKLOG_DIR` | `~/home/backlog` | 로컬 클론 경로 (`cwd`로 사용) |
+| `BACKLOG_REPO` | `owner/repo` | 대상 GitHub 레포 |
+| `BACKLOG_DIR` | `~/path/to/repo` | 로컬 클론 경로 (`cwd`로 사용) |
 | `CLAUDE_BIN` | `claude` | Claude Code CLI 바이너리 경로 |
 | `CLAUDE_MODEL` | `sonnet` | 사용할 Claude 모델 |
 | `ISSUE_LABELS` | `learning,infra,side-project,content,core-skill` | 쉼표 구분 유효 라벨 목록 |

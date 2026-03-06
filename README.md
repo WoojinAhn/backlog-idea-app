@@ -35,8 +35,8 @@ No Anthropic API key needed — uses your existing Claude Code subscription.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BACKLOG_REPO` | `WoojinAhn/backlog` | Target GitHub repo (`owner/repo`) |
-| `BACKLOG_DIR` | `~/home/backlog` | Local clone path (used as `cwd`) |
+| `BACKLOG_REPO` | `owner/repo` | Target GitHub repo |
+| `BACKLOG_DIR` | `~/path/to/repo` | Local clone path (used as `cwd`) |
 | `CLAUDE_BIN` | `claude` | Path to Claude Code CLI binary |
 | `CLAUDE_MODEL` | `sonnet` | Claude model to use |
 | `ISSUE_LABELS` | `learning,infra,side-project,content,core-skill` | Comma-separated valid labels |
