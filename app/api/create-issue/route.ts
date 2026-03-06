@@ -77,7 +77,7 @@ function runClaude(prompt: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
-    const { idea } = await req.json();
+    const { idea, dryRun } = await req.json();
 
     if (!idea || typeof idea !== "string" || idea.trim().length === 0) {
       return NextResponse.json({ error: "Idea is required" }, { status: 400 });
@@ -107,6 +107,16 @@ export async function POST(req: NextRequest) {
     issue.labels = issue.labels.filter((l) => validLabels.includes(l));
     if (issue.labels.length === 0) {
       issue.labels = ["learning"];
+    }
+
+    // Dry run: return formatted issue without creating it
+    if (dryRun) {
+      return NextResponse.json({
+        dryRun: true,
+        title: issue.title,
+        labels: issue.labels,
+        body: issue.body,
+      });
     }
 
     // Create the GitHub issue
