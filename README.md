@@ -145,6 +145,35 @@ You can create an iOS Shortcut to submit ideas from your phone:
 - For remote access, use a tunneling solution such as [Tailscale](https://tailscale.com/).
 - **Recommended**: Set `API_TOKEN` when exposing the app on the network to prevent unauthorized access.
 
+## Claude Code Slash Command
+
+You can register the CLI as a [custom slash command](https://docs.anthropic.com/en/docs/claude-code/tutorials/custom-slash-commands) for quick access within Claude Code sessions.
+
+Create `~/.claude/commands/backlog-idea.md` (global) or `.claude/commands/backlog-idea.md` (project-scoped):
+
+```markdown
+---
+description: Create a GitHub issue from a raw idea
+argument-hint: [--dry-run] your idea here
+allowed-tools: Bash
+---
+
+Run the backlog-idea CLI with the user's input.
+
+\```bash
+cd /path/to/backlog-idea-app && npm run cli -- $ARGUMENTS
+\```
+
+Summarize the result to the user.
+```
+
+Then use it from any Claude Code session:
+
+```
+/backlog-idea Redis caching for API responses
+/backlog-idea --dry-run new onboarding flow
+```
+
 ## Project Structure
 
 ```

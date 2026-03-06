@@ -145,6 +145,35 @@ iPhone에서 아이디어를 제출하는 단축어를 만들 수 있습니다:
 - 원격 접근이 필요하면 [Tailscale](https://tailscale.com/) 같은 터널링 솔루션을 사용하세요.
 - **권장**: 네트워크에 앱을 노출할 때는 무단 접근 방지를 위해 `API_TOKEN`을 설정하세요.
 
+## Claude Code 슬래시 커맨드
+
+CLI를 [커스텀 슬래시 커맨드](https://docs.anthropic.com/en/docs/claude-code/tutorials/custom-slash-commands)로 등록하면 Claude Code 세션에서 빠르게 사용할 수 있습니다.
+
+`~/.claude/commands/backlog-idea.md` (글로벌) 또는 `.claude/commands/backlog-idea.md` (프로젝트 스코프)를 생성:
+
+```markdown
+---
+description: Create a GitHub issue from a raw idea
+argument-hint: [--dry-run] your idea here
+allowed-tools: Bash
+---
+
+Run the backlog-idea CLI with the user's input.
+
+\```bash
+cd /path/to/backlog-idea-app && npm run cli -- $ARGUMENTS
+\```
+
+Summarize the result to the user.
+```
+
+Claude Code 세션에서 사용:
+
+```
+/backlog-idea Redis caching for API responses
+/backlog-idea --dry-run new onboarding flow
+```
+
 ## 프로젝트 구조
 
 ```
