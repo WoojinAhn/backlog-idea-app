@@ -21,6 +21,8 @@ No Anthropic API key needed — uses your existing Claude Code subscription.
 - Uses `spawn` (not `exec`) for reliable subprocess control.
 - `CLAUDECODE` / `CLAUDE_CODE_ENTRYPOINT` env vars are stripped to prevent nested session detection.
 
+> **⚠️ Local-only** — This app runs CLI tools (`claude`, `gh`) as subprocesses and cannot be deployed to cloud platforms (Vercel, etc.) as-is.
+
 ## Prerequisites
 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) (`claude`)
