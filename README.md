@@ -73,12 +73,25 @@ Auto-detected from OS `LANG`, or override with `LOCALE` env var.
 ## Getting Started
 
 ```bash
+git clone https://github.com/WoojinAhn/backlog-idea-app.git
+cd backlog-idea-app
 npm install
-cp .env.example .env.local   # edit with your settings
-npm run dev
+cp .env.example .env.local
 ```
 
-Open http://localhost:3000.
+Edit `.env.local` — at minimum, set these two:
+
+```bash
+BACKLOG_REPO=your-username/your-repo   # target GitHub repo
+BACKLOG_DIR=~/path/to/your-repo        # local clone of that repo
+```
+
+Then start the web UI or use the CLI directly:
+
+```bash
+npm run dev                             # web UI at http://localhost:3000
+npm run cli -- "your idea here"         # CLI (no server needed)
+```
 
 ## CLI
 
